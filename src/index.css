@@ -1,24 +1,135 @@
-.image-gallery {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0, auto;
-  max-width: 1200px;
-}
-.view-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  width: 100%;
-}
-.view-toggle.active {
-  color: blue;
+.image-list {
+  margin: 0 auto;
+  max-width: 800px;
 }
 
-.images {
-  width: 300px;
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
-.images img {
+
+.options {
+  margin: 2rem 0;
+}
+
+.view-type {
+  display: flex;
+}
+ul li {
+  list-style: none;
+}
+h1 {
+  color: crimson;
+}
+
+.btn {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 0.25rem;
+  color: #333;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  padding: 0.5rem;
+}
+
+.btn.active {
+  background-color: #333;
+  color: #fff;
+}
+
+.sort-by {
+  display: flex;
+  align-items: center;
+}
+
+.sort-by label {
+  margin-right: 0.5rem;
+}
+
+.sort-by select {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 0.25rem;
+  color: #333;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.search input {
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 0.25rem;
+  color: #333;
+  font-size: 1rem;
+  padding: 0.5rem;
   width: 100%;
+}
+
+.grid-container {
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.grid-item {
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.grid-item img {
+  width: 100%;
+}
+
+.list-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.list-item img {
+  border-radius: 0.25rem;
+  margin-right: 0.5rem;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.list-item .details {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-item .details h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.list-item .details p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.page-item {
+  margin-right: 0.5rem;
+}
+.page-link {
+  cursor: pointer;
+}
+
+.page-item:last-child {
+  margin-right: 0;
 }

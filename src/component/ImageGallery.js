@@ -2,140 +2,165 @@ import React, { useState, useEffect } from "react";
 
 const ImageGallery = () => {
   const [images, setImages] = useState([]);
-  const [viewType, setViewType] = useState("list");
-  const [sortedImages, setSortedImages] = useState([]);
-  const [sortBy, setSortBy] = useState("dateUploaded");
+  const [view, setView] = useState("grid");
+  const [sortBy, setSortBy] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const imagesPerPage = 9;
+  const [imagesPerPage, setImagesPerPage] = useState(9);
 
-  const fetchImage = async () => {
-    try {
-      const response = await fetch("https://picsum.photos/v2/list");
-      // console.log(data);
-      const data = await response.json();
-      const formattedData = data.map((image) => ({
-        id: image.id,
-        url: image.download_url,
-        name: `Image ${image.id}`,
-        dateUploaded: new Date().toLocaleString(),
-        fileSize: `${Math.floor(Math.random() * 1000)} KB`,
-      }));
-      setImages(formattedData);
-      setSortedImages(formattedData);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  useEffect(() => {
-    fetchImage();
-  }, []);
-
-  const handleViewToggle = () => {
-    setViewType(viewType === "list" ? "grid" : "list");
+  const handleViewChange = (viewType) => {
+    setView(viewType);
   };
 
-  const handleSortBy = (e) => {
-    setSortBy(e.target.value);
+  const handleSortChange = (sortByOption) => {
+    setSortBy(sortByOption);
   };
 
-  const handleSearchTerm = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
+  const handleSearch = (searchTerm) => {
+    setSearchTerm(searchTerm);
   };
 
-  const handlePageChange = (e, pageNumber) => {
-    e.preventDefault();
+  const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
   useEffect(() => {
-    let sortedData = [...images];
-    console.log(sortedData);
-    if (sortBy === "dateUploaded") {
-      sortedData.sort(
-        (a, b) => new Date(b.dateUploaded) - new Date(a.dateUploaded)
-      );
-    } else if (sortBy === "fileSize") {
-      sortedData.sort((a, b) => b.fileSize - a.fileSize);
-    }
-    setSortedImages(sortedData);
-  }, [sortBy, images]);
+    const fetchImages = () => {
+      // generate random images with size and date
+      const images = [];
+      for (let i = 1; i <= 100; i++) {
+        const imageSize = Math.floor(Math.random() * 10000) + 1000; // random size between 1KB to 10MB
+        const date = new Date(
+          Date.now() - Math.floor(Math.random() * 10000000000)
+        ).toISOString(); // random date within the last 10000 days
+        images.push({
+          id: i,
+          download_url: `https://picsum.photos/500/500?random=${i}`,
+          author: `Author ${i}`,
+          uploaded_at: date,
+          size: imageSize,
+        });
+      }
+      setImages(images);
+    };
+    fetchImages();
+  }, []);
 
-  const filteredImages = sortedImages.filter((image) =>
-    image.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredImages = images.filter((image) => {
+    const term = searchTerm.toLowerCase();
+    const name = image.author.toLowerCase();
+    const date = new Date(image.uploaded_at).toLocaleDateString().toLowerCase();
+    const size = image.size.toString().toLowerCase();
+
+    return name.includes(term) || date.includes(term) || size.includes(term);
+  });
+
+  const sortedImages = filteredImages.sort((a, b) => {
+    if (sortBy === "date") {
+      return new Date(a.uploaded_at) - new Date(b.uploaded_at);
+    } else if (sortBy === "size") {
+      return a.size - b.size;
+    } else {
+      return 0;
+    }
+  });
 
   const indexOfLastImage = currentPage * imagesPerPage;
   const indexOfFirstImage = indexOfLastImage - imagesPerPage;
-  const currentImages = filteredImages.slice(
-    indexOfFirstImage,
-    indexOfLastImage
-  );
-  return (
-    <div className="image-gallery">
-      <div className="view-toggle">
-        <button
-          className={`list-view ${viewType === "list" ? "active" : ""}`}
-          onclick={handleViewToggle}
-        >
-          List View
-        </button>
-        <button
-          className={`grid-view ${viewType === "grid" ? "active" : ""}`}
-          onClick={handleViewToggle}
-        >
-          Grid View
-        </button>
-      </div>
-      <div className="sort-by">
-        <label htmlFor="sort-by-select">Sort By:</label>
-        <select id="sort-by-select" value={sortBy} onChange={handleSortBy}>
-          <option value="dateUploaded">Date Uploaded</option>
-          <option value="fileSize">File Size</option>
-        </select>
-      </div>
-      <div className="search">
-        <label htmlFor="search-input">Search</label>
-        <input
-          type="text"
-          id="search-input"
-          value={searchTerm}
-          onChange={handleSearchTerm}
-        />
-      </div>
-      <div className={`image-list ${viewType === "grid" ? "grid-view" : ""}`}>
-        <div className="images">
+  const currentImages = sortedImages.slice(indexOfFirstImage, indexOfLastImage);
+
+  const renderImages = () => {
+    if (view === "list") {
+      return currentImages.map((image) => (
+        <div key={image.id} className="list-item">
+          <img src={image.download_url} alt={image.author} />
+          <div className="details">
+            <h3>{image.author}</h3>
+            <p>
+              Date Uploaded: {new Date(image.uploaded_at).toLocaleDateString()}
+            </p>
+            <p>File Size: {image.size / 1024} KB</p>
+          </div>
+        </div>
+      ));
+    } else {
+      return (
+        <div className="grid-container">
           {currentImages.map((image) => (
-            <div className="image" key={image.id}>
-              <img src={image.url} alt={image.name} />
-              <div className="image-details">
-                <div className="image-name">{image.name}</div>
-                <div className="image-date">{image.dateUploaded}</div>
-                <div className="image-size">{image.fileSize}</div>
-              </div>
+            <div key={image.id} className="grid-item">
+              <img src={image.download_url} alt={image.author} />
             </div>
           ))}
         </div>
-        <div className="pagination">
-          {filteredImages.length > imagesPerPage && (
-            <ul>
-              {Array(Math.ceil(filteredImages.length / imagesPerPage))
-                .fill()
-                .map((item, i) => (
-                  <li key={i}>
-                    <button
-                      className={currentPage === i + 1 ? "active" : ""}
-                      onClick={(e) => handlePageChange(e, i + 1)}
-                    >
-                      {i + 1}
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          )}
+      );
+    }
+  };
+  const renderPagination = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= Math.ceil(sortedImages.length / imagesPerPage); i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <ul className="pagination">
+        {pageNumbers.map((number) => (
+          <li key={number} className="page-item">
+            <button
+              className={`btn page-link${
+                currentPage === number ? " active" : ""
+              }`}
+              onClick={() => handlePageChange(number)}
+            >
+              {number}
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
+  return (
+    <div className="image-list">
+      <div className="header">
+        <h1>Image Gallery</h1>
+        <div className="options">
+          <div className="sort-by">
+            <label htmlFor="view-select">View:</label>
+            <select
+              id="view-select"
+              value={view}
+              onChange={(e) => handleViewChange(e.target.value)}
+            >
+              <option value="grid">Grid</option>
+              <option value="list">List</option>
+            </select>
+
+            <label htmlFor="sort-select">Sort by:</label>
+            <select
+              id="sort-select"
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+            >
+              <option value="">None</option>
+              <option value="date">Date</option>
+              <option value="size">Size</option>
+            </select>
+          </div>
+
+          <div className="search">
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
+
+      <div className="image-container">{renderImages()}</div>
+
+      <div className="pagination-container">{renderPagination()}</div>
     </div>
   );
 };
